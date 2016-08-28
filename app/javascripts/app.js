@@ -8,32 +8,37 @@ function setStatus(message) {
 
 function refreshBalance() {
   var ex = exchange.deployed();
-
-  ex.getBalance.call(account, {from: account}).then(function(value) {
+  ex.currentPrice().then(function (value) {
+    console.log(value.valueOf());
+  });
+  ex.getBalance.call(account).then(function(value) {
     var balance_element = document.getElementById("balance");
     balance_element.innerHTML = value.valueOf();
   }).catch(function(e) {
     console.log(e);
     setStatus("Error getting balance; see log.");
   });
-};
-
-function sendCoin() {
-  var meta = MetaCoin.deployed();
-
-  var amount = parseInt(document.getElementById("amount").value);
-  var receiver = document.getElementById("receiver").value;
-
-  setStatus("Initiating transaction... (please wait)");
-
-  meta.sendCoin(receiver, amount, {from: account}).then(function() {
-    setStatus("Transaction complete!");
-    refreshBalance();
+  ex.getCurrentPrice.call(account).then(function(value) {
+    var curP = document.getElementById("curPrice");
+    curP.innerHTML = value.valueOf();
   }).catch(function(e) {
     console.log(e);
-    setStatus("Error sending coin; see log.");
+    setStatus("Error getting balance; see log.");
   });
 };
+
+function getUnits() {
+  var ex = exchange.deployed();
+  ex.getunits.call(account,{from: account}).then(function (value) {
+    refreshBalance();
+  })
+}
+
+// function sendBid() {
+//   var bidAmt = document.getElementById("asknum").value;
+//   var bidUnits = document.getElementById("askunit").value
+//   ex.bid.call(account,bidAmt,bidUnits,).then(function(value)
+// }
 
 window.onload = function() {
   web3.eth.getAccounts(function(err, accs) {
@@ -49,6 +54,8 @@ window.onload = function() {
 
     accounts = accs;
     account = accounts[0];
+    console.log(account);
+    console.log(accounts);
 
     refreshBalance();
   });

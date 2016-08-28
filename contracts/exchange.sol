@@ -7,12 +7,15 @@ contract exchange {
          address addr;
         }
     struct userAccount {
+         bytes32 poi;
          uint units;
          uint remAmt;
     }
     TradeReq[] public BidReq;
     TradeReq[] public AskReq;
+    uint public currentPrice;
     mapping (address=>userAccount) balance;
+    mapping (address=>bool) user;
     
     //events
     event TradeSuccess(address _from, address _to, uint price);
@@ -29,8 +32,15 @@ contract exchange {
         }
         _
     }
+    modifier onlyCorrectUser() {
+        if(user[msg.sender] != true ) {
+            throw;
+        }
+        _
+    }
     function exchange() {
         owner = msg.sender;
+        currentPrice = 10;
     }
 
     function MatchCon() {
@@ -43,18 +53,20 @@ contract exchange {
                 BidReq.length -=1;
                 //share transfer
                 balance[BidReq[i].addr].units += BidReq[i].units;
+                currentPrice = BidReq[i].price;
                 MatchCon();
             } else {
                 BidReq[i].units -= AskReq[i].units;
                 AskReq.length -= 1;
                 //share transfer
                 balance[BidReq[i].addr].units += AskReq[i].units;
+                currentPrice = BidReq[i].price;
                 MatchCon();
             }
         }
     }
 
-    function bid(uint units, uint price) {
+    function bid(uint units, uint price) onlyCorrectUser {
         if ( msg.value >= units*price) throw;
         var bidTrade = TradeReq(units,price,msg.value,msg.sender);
 
@@ -69,7 +81,7 @@ contract exchange {
         MatchCon();
     }
 
-    function ask(uint units, uint price) checkBalance(units) {
+    function ask(uint units, uint price) checkBalance(units) onlyCorrectUser {
         var askTrade = TradeReq(units,price,0,msg.sender);
         
         //stop double spending
@@ -96,8 +108,21 @@ contract exchange {
     // function getActiveTrades() returns (){
     //     return (BidReq,AskReq);
     // }
+    function getCurrentPrice() returns (uint) {
+        return currentPrice;
+    }
     function getBalance() returns (uint){
-        return balance[msg.sender].units;
+        if (user[msg.sender] != true) return 0;
+        else {
+            return balance[msg.sender].units;
+        }
+    }
+    function getunits() returns (bool){
+        if(user[msg.sender] != true){
+            user[msg.sender] = true;
+        }
+        balance[msg.sender] = userAccount(10,2000);
+        return true;
     }
 
 }
