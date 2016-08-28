@@ -10,8 +10,8 @@ contract exchange {
          uint units;
          uint remAmt;
     }
-    TradeReq[] BidReq;
-    TradeReq[] AskReq;
+    TradeReq[] public BidReq;
+    TradeReq[] public AskReq;
     mapping (address=>userAccount) balance;
     
     //events
@@ -92,4 +92,12 @@ contract exchange {
     function withdraw() {
         
     }
+
+    // function getActiveTrades() returns (){
+    //     return (BidReq,AskReq);
+    // }
+    function getBalance() returns (uint){
+        return balance[msg.sender].units;
+    }
+
 }

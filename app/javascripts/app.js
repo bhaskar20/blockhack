@@ -7,9 +7,9 @@ function setStatus(message) {
 };
 
 function refreshBalance() {
-  var meta = MetaCoin.deployed();
+  var ex = exchange.deployed();
 
-  meta.getBalance.call(account, {from: account}).then(function(value) {
+  ex.getBalance.call(account, {from: account}).then(function(value) {
     var balance_element = document.getElementById("balance");
     balance_element.innerHTML = value.valueOf();
   }).catch(function(e) {
